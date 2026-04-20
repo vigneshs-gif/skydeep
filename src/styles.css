@@ -1,0 +1,199 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap");
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * SkyDeep Airlines — Design System
+ * Sky Deep palette: deep navy → ocean teal
+ * Space Grotesk (display) + DM Sans (body)
+ */
+
+@theme inline {
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-sky-deep: var(--sky-deep);
+  --color-sky-mid: var(--sky-mid);
+  --color-sky-teal: var(--sky-teal);
+  --color-sky-glow: var(--sky-glow);
+}
+
+:root {
+  --radius: 0.75rem;
+
+  /* Sky Deep Palette */
+  --sky-deep: oklch(0.22 0.07 250);    /* #0c2340 */
+  --sky-mid: oklch(0.38 0.09 230);     /* #1a4a6e */
+  --sky-teal: oklch(0.62 0.10 210);    /* #2d8a9e */
+  --sky-glow: oklch(0.78 0.10 195);    /* #5cbdb9 */
+
+  --background: oklch(0.985 0.005 240);
+  --foreground: oklch(0.18 0.05 250);
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.18 0.05 250);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.18 0.05 250);
+
+  --primary: oklch(0.22 0.07 250);              /* sky-deep */
+  --primary-foreground: oklch(0.985 0.005 240);
+
+  --secondary: oklch(0.78 0.10 195);            /* sky-glow */
+  --secondary-foreground: oklch(0.22 0.07 250);
+
+  --muted: oklch(0.96 0.01 240);
+  --muted-foreground: oklch(0.45 0.04 240);
+
+  --accent: oklch(0.62 0.10 210);               /* sky-teal */
+  --accent-foreground: oklch(0.985 0.005 240);
+
+  --destructive: oklch(0.58 0.22 25);
+  --destructive-foreground: oklch(0.985 0.005 240);
+
+  --success: oklch(0.62 0.15 160);
+  --success-foreground: oklch(0.985 0.005 240);
+
+  --warning: oklch(0.75 0.15 75);
+  --warning-foreground: oklch(0.18 0.05 250);
+
+  --border: oklch(0.91 0.01 240);
+  --input: oklch(0.91 0.01 240);
+  --ring: oklch(0.62 0.10 210);
+}
+
+.dark {
+  --background: oklch(0.16 0.04 250);
+  --foreground: oklch(0.96 0.01 240);
+  --card: oklch(0.22 0.05 250);
+  --card-foreground: oklch(0.96 0.01 240);
+  --popover: oklch(0.22 0.05 250);
+  --popover-foreground: oklch(0.96 0.01 240);
+  --primary: oklch(0.78 0.10 195);
+  --primary-foreground: oklch(0.18 0.05 250);
+  --secondary: oklch(0.30 0.06 240);
+  --secondary-foreground: oklch(0.96 0.01 240);
+  --muted: oklch(0.28 0.05 240);
+  --muted-foreground: oklch(0.70 0.03 240);
+  --accent: oklch(0.62 0.10 210);
+  --accent-foreground: oklch(0.18 0.05 250);
+  --destructive: oklch(0.65 0.20 25);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.62 0.10 210);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html, body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6, .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+}
+
+/* ----- Custom utilities & gradients ----- */
+@utility bg-hero-gradient {
+  background:
+    radial-gradient(ellipse 80% 60% at 70% 0%, color-mix(in oklch, var(--sky-teal) 45%, transparent), transparent 60%),
+    radial-gradient(ellipse 70% 50% at 0% 100%, color-mix(in oklch, var(--sky-glow) 35%, transparent), transparent 55%),
+    linear-gradient(135deg, var(--sky-deep) 0%, var(--sky-mid) 60%, var(--sky-teal) 100%);
+}
+
+@utility bg-card-gradient {
+  background: linear-gradient(135deg,
+    color-mix(in oklch, var(--sky-deep) 100%, transparent),
+    color-mix(in oklch, var(--sky-mid) 100%, transparent));
+}
+
+@utility text-gradient-sky {
+  background: linear-gradient(135deg, var(--sky-glow), var(--sky-teal));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility shadow-sky {
+  box-shadow:
+    0 10px 30px -10px color-mix(in oklch, var(--sky-deep) 35%, transparent),
+    0 4px 10px -4px color-mix(in oklch, var(--sky-teal) 25%, transparent);
+}
+
+@utility shadow-sky-lg {
+  box-shadow:
+    0 20px 50px -12px color-mix(in oklch, var(--sky-deep) 45%, transparent),
+    0 8px 20px -8px color-mix(in oklch, var(--sky-teal) 30%, transparent);
+}
+
+@utility glass {
+  background: color-mix(in oklch, white 8%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid color-mix(in oklch, white 15%, transparent);
+}
+
+/* Realtime pulse for live status */
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@utility live-dot {
+  animation: live-pulse 1.6s ease-in-out infinite;
+}
+
+/* Subtle plane drift */
+@keyframes drift {
+  0% { transform: translateX(-10%) translateY(0); }
+  50% { transform: translateX(10%) translateY(-8px); }
+  100% { transform: translateX(-10%) translateY(0); }
+}
+
+@utility animate-drift {
+  animation: drift 14s ease-in-out infinite;
+}
