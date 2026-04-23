@@ -28,7 +28,7 @@ export function SiteHeader() {
             <Plane className="h-4 w-4 -rotate-45" />
           </div>
           <div className="flex flex-col leading-none">
-            <span className="font-display text-lg font-bold tracking-tight">SkyDeep</span>
+            <span className="font-display text-lg font-bold tracking-tight">skydeep</span>
             <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Airlines</span>
           </div>
         </Link>

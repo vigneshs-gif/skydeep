@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { ArrowLeftRight, Calendar, MapPin, Search, Users } from "lucide-react";
@@ -23,12 +23,31 @@ const POPULAR_AIRPORTS = [
   { code: "BOS", city: "Boston" },
 ];
 
-export function FlightSearchForm({ compact = false }: { compact?: boolean }) {
+export function FlightSearchForm({
+  compact = false,
+  initialSearch,
+}: {
+  compact?: boolean;
+  initialSearch?: {
+    from?: string;
+    to?: string;
+    date?: string;
+    passengers?: number;
+  };
+}) {
   const navigate = useNavigate();
-  const [from, setFrom] = useState("JFK");
-  const [to, setTo] = useState("LAX");
-  const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
-  const [passengers, setPassengers] = useState("1");
+  const [from, setFrom] = useState(initialSearch?.from ?? "JFK");
+  const [to, setTo] = useState(initialSearch?.to ?? "LAX");
+  const [date, setDate] = useState(initialSearch?.date || format(new Date(), "yyyy-MM-dd"));
+  const [passengers, setPassengers] = useState(String(initialSearch?.passengers ?? 1));
+
+  useEffect(() => {
+    if (!initialSearch) return;
+    setFrom(initialSearch.from ?? "JFK");
+    setTo(initialSearch.to ?? "LAX");
+    setDate(initialSearch.date || format(new Date(), "yyyy-MM-dd"));
+    setPassengers(String(initialSearch.passengers ?? 1));
+  }, [initialSearch?.from, initialSearch?.to, initialSearch?.date, initialSearch?.passengers]);
 
   const swap = () => {
     setFrom(to);

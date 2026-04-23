@@ -27,7 +27,7 @@ export const Route = createFileRoute("/search")({
   head: ({ match }) => ({
     meta: [
       {
-        title: `Flights ${match.search.from} → ${match.search.to} — SkyDeep`,
+        title: `Flights ${match.search.from} → ${match.search.to} — skydeep`,
       },
       {
         name: "description",
@@ -84,7 +84,14 @@ function SearchPage() {
       {/* Sticky search bar */}
       <div className="bg-card border-b border-border/60 py-4 px-4 md:px-6 shadow-sm">
         <div className="mx-auto max-w-6xl">
-          <FlightSearchForm />
+          <FlightSearchForm
+            initialSearch={{
+              from: search.from,
+              to: search.to,
+              date: search.date,
+              passengers: search.passengers,
+            }}
+          />
         </div>
       </div>
 

@@ -8,13 +8,13 @@ import { useAuth } from "@/lib/auth-context";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "SkyDeep Airlines — Realtime flight booking" },
+      { title: "skydeep — Realtime flight booking" },
       {
         name: "description",
         content:
           "Search and book flights with live seat availability. Realtime status updates from gate to landing.",
       },
-      { property: "og:title", content: "SkyDeep Airlines — Realtime flight booking" },
+      { property: "og:title", content: "skydeep — Realtime flight booking" },
       {
         property: "og:description",
         content: "Search and book flights with live seat availability.",

@@ -42,7 +42,7 @@ export const Route = createFileRoute("/payment")({
   validateSearch: paymentSearchSchema,
   head: () => ({
     meta: [
-      { title: "Secure Payment — SkyDeep Airlines" },
+      { title: "Secure Payment — skydeep" },
       { name: "description", content: "Choose your payment method and confirm your booking." },
     ],
   }),
@@ -208,7 +208,6 @@ function PaymentPage() {
       </div>
     );
   }
-
   const seatBreakdown = selectedSeats.map((seat) => {
     const row = parseInt(seat, 10);
     const seatClass = row <= 3 ? "first" : row <= 7 ? "business" : "economy";
@@ -288,9 +287,12 @@ function PaymentPage() {
       return;
     }
 
-    const emailResults = await Promise.allSettled(data.map((booking) => notifyBookingStatusEmail(booking.id)));
+    const emailResults = await Promise.allSettled(
+      data.map((booking) => notifyBookingStatusEmail(booking.id)),
+    );
     const emailFailed = emailResults.some(
-      (result) => result.status === "rejected" || (result.status === "fulfilled" && !result.value.ok),
+      (result) =>
+        result.status === "rejected" || (result.status === "fulfilled" && !result.value.ok),
     );
     toast.success(
       `${PAYMENT_METHOD_LABELS[paymentMethod]} payment submitted for ${selectedSeats.length} seat${selectedSeats.length > 1 ? "s" : ""}.`,
@@ -366,7 +368,7 @@ function PaymentPage() {
                   {formatCountdown(secondsLeft)}
                 </div>
                 <div className="mt-4 space-y-3 text-sm">
-                  <InfoDark label="Merchant" value="SkyDeep Airlines" />
+                  <InfoDark label="Merchant" value="skydeep" />
                   <InfoDark label="Transaction ID" value={transactionId} />
                   <InfoDark label="Amount payable" value={formatCurrencyInr(totalPriceUsd)} />
                 </div>
@@ -553,7 +555,7 @@ function PaymentPage() {
                   label={`${PAYMENT_METHOD_LABELS[paymentMethod]} ready`}
                   detail={getPaymentProgressDetail(paymentMethod)}
                 />
-                <StepRow label="Booking sent for approval" detail="Created after payment confirmation" />
+                <StepRow label="Booking confirmed" detail="Created right after payment confirmation" />
               </div>
               </div>
 
@@ -777,7 +779,11 @@ async function insertBookingWithFallback({
     return initialResult;
   }
 
-  return supabase.from("bookings").insert(basePayload).select().order("created_at", { ascending: true });
+  return supabase
+    .from("bookings")
+    .insert(basePayload)
+    .select()
+    .order("created_at", { ascending: true });
 }
 
 function isMissingPaymentMethodColumnError(message: string) {

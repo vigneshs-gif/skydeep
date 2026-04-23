@@ -27,7 +27,7 @@ export const Route = createFileRoute("/flights/$flightId")({
   validateSearch: searchSchema,
   head: ({ params }) => ({
     meta: [
-      { title: `Flight ${params.flightId.slice(0, 8)} — SkyDeep` },
+      { title: `Flight ${params.flightId.slice(0, 8)} — skydeep` },
       { name: "description", content: "Select your seat and complete your booking." },
     ],
   }),
@@ -365,7 +365,9 @@ function FlightDetailPage() {
                 <span>Class</span>
                 <span className="capitalize">
                   {selectedSeats.length > 0
-                    ? selectedSeats.map((seat) => `${seat}: ${seatClass(parseInt(seat, 10))}`).join(", ")
+                    ? selectedSeats
+                        .map((seat) => `${seat}: ${seatClass(parseInt(seat, 10))}`)
+                        .join(", ")
                     : "—"}
                 </span>
               </div>

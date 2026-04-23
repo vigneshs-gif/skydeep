@@ -40,13 +40,13 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "SkyDeep Airlines — Realtime flight booking" },
+      { title: "skydeep — Realtime flight booking" },
       {
         name: "description",
         content:
-          "Book flights with live seat availability and realtime status updates. SkyDeep Airlines.",
+          "Book flights with live seat availability and realtime status updates. skydeep.",
       },
-      { property: "og:title", content: "SkyDeep Airlines" },
+      { property: "og:title", content: "skydeep" },
       {
         property: "og:description",
         content: "Realtime flight booking with live seat selection.",

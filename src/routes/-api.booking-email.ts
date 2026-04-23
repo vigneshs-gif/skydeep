@@ -92,7 +92,7 @@ export const APIRoute = createAPIFileRoute("/api/booking-email")({
 
 async function sendBookingStatusEmail(booking: BookingEmailRow) {
   const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.BOOKING_EMAIL_FROM ?? "SkyDeep Airlines <onboarding@resend.dev>";
+  const from = process.env.BOOKING_EMAIL_FROM ?? "skydeep <onboarding@resend.dev>";
   const replyTo = process.env.BOOKING_EMAIL_REPLY_TO;
 
   if (!apiKey) {

@@ -43,7 +43,7 @@ function getPaymentMethodLabel(method?: string | null) {
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
-      { title: "Admin — SkyDeep Airlines" },
+      { title: "Admin — skydeep" },
       { name: "description", content: "Manage flights and bookings." },
     ],
   }),
@@ -147,12 +147,18 @@ function AdminDashboard() {
             <TabsTrigger value="bookings">
               <Users className="h-3.5 w-3.5 mr-1.5" /> Bookings
             </TabsTrigger>
+            <TabsTrigger value="users">
+              <ShieldCheck className="h-3.5 w-3.5 mr-1.5" /> Users
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="flights" className="mt-5">
             <FlightsAdmin />
           </TabsContent>
           <TabsContent value="bookings" className="mt-5">
             <BookingsAdmin />
+          </TabsContent>
+          <TabsContent value="users" className="mt-5">
+            <UsersAdmin />
           </TabsContent>
         </Tabs>
       </div>
@@ -295,11 +301,7 @@ function BookingsAdmin() {
     const emailResult = await notifyBookingStatusEmail(id);
     queryClient.invalidateQueries({ queryKey: ["admin-bookings"] });
     const message =
-      status === "confirmed"
-        ? "Booking approved successfully."
-        : status === "cancelled"
-          ? "Booking cancelled successfully."
-          : "Booking updated successfully.";
+      status === "cancelled" ? "Booking cancelled successfully." : "Booking updated successfully.";
     toast.success(message);
     if (!emailResult.ok) {
       toast.warning(emailResult.message ?? "Status updated, but the email could not be sent.");
@@ -369,17 +371,8 @@ function BookingsAdmin() {
                       type="button"
                       size="sm"
                       variant="outline"
-                      onClick={() => updateBookingStatus(b.id, "confirmed")}
-                      disabled={b.status !== "pending"}
-                    >
-                      Approve
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
                       onClick={() => updateBookingStatus(b.id, "cancelled")}
-                      disabled={b.status !== "cancellation_requested"}
+                      disabled={b.status !== "cancellation_requested" && b.status !== "pending"}
                     >
                       Approve cancellation
                     </Button>
@@ -394,17 +387,186 @@ function BookingsAdmin() {
   );
 }
 
+type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
+type UserRoleRow = Database["public"]["Tables"]["user_roles"]["Row"];
+type AdminUserRow = ProfileRow & {
+  role: Database["public"]["Enums"]["app_role"];
+};
+
+function UsersAdmin() {
+  const queryClient = useQueryClient();
+
+  const { data: users, isLoading } = useQuery({
+    queryKey: ["admin-users"],
+    queryFn: async () => {
+      const [{ data: profiles, error: profilesError }, { data: roles, error: rolesError }] =
+        await Promise.all([
+          supabase.from("profiles").select("*").order("created_at", { ascending: false }),
+          supabase.from("user_roles").select("*"),
+        ]);
+
+      if (profilesError) throw profilesError;
+      if (rolesError) throw rolesError;
+
+      const roleMap = new Map<string, Database["public"]["Enums"]["app_role"]>();
+      (roles as UserRoleRow[] | null)?.forEach((role) => {
+        roleMap.set(role.user_id, role.role);
+      });
+
+      return ((profiles as ProfileRow[] | null) ?? []).map((profile) => ({
+        ...profile,
+        role: roleMap.get(profile.user_id) ?? "customer",
+      })) as AdminUserRow[];
+    },
+  });
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("admin-users-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () =>
+        queryClient.invalidateQueries({ queryKey: ["admin-users"] }),
+      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "user_roles" }, () =>
+        queryClient.invalidateQueries({ queryKey: ["admin-users"] }),
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
+  const makeAdmin = async (userId: string) => {
+    const { error } = await supabase.from("user_roles").insert({ user_id: userId, role: "admin" });
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+    toast.success("Admin access granted.");
+  };
+
+  if (isLoading) {
+    return (
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-52 rounded-2xl bg-card animate-pulse" />
+        ))}
+      </div>
+    );
+  }
+
+  const totalUsers = users?.length ?? 0;
+  const adminUsers = users?.filter((user) => user.role === "admin").length ?? 0;
+  const customerUsers = totalUsers - adminUsers;
+
+  return (
+    <div className="space-y-5">
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm">
+          <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Total users</div>
+          <div className="mt-2 font-display text-3xl font-bold">{totalUsers}</div>
+        </div>
+        <div className="rounded-2xl border border-emerald-200/70 bg-emerald-50/80 p-5 shadow-sm">
+          <div className="text-xs uppercase tracking-[0.18em] text-emerald-700">Admins</div>
+          <div className="mt-2 font-display text-3xl font-bold text-emerald-900">{adminUsers}</div>
+        </div>
+        <div className="rounded-2xl border border-sky-200/70 bg-sky-50/80 p-5 shadow-sm">
+          <div className="text-xs uppercase tracking-[0.18em] text-sky-700">Customers</div>
+          <div className="mt-2 font-display text-3xl font-bold text-sky-900">{customerUsers}</div>
+        </div>
+      </div>
+      <div className="rounded-2xl border border-border/60 bg-card p-5">
+        <div className="flex flex-col gap-1 border-b border-border/60 pb-4">
+          <h2 className="font-display text-lg font-semibold">User access</h2>
+          <p className="text-sm text-muted-foreground">
+            View account details and promote customers to admin. Passwords are never visible for security.
+          </p>
+        </div>
+
+        {users?.length === 0 ? (
+          <div className="py-12 text-center text-muted-foreground">No users found.</div>
+        ) : (
+          <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {users?.map((user) => (
+              <div
+                key={user.id}
+                className="rounded-2xl border border-border/60 bg-gradient-to-br from-white to-slate-50 p-5 shadow-sm transition-shadow hover:shadow-md"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="font-display text-lg font-semibold">
+                      {user.full_name || "Unnamed user"}
+                    </div>
+                    <div className="mt-1 text-sm text-muted-foreground">
+                      {user.email || "No email"}
+                    </div>
+                  </div>
+                  <span
+                    className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium capitalize ${
+                      user.role === "admin"
+                        ? "bg-success/15 text-success border-success/30"
+                        : "bg-sky-50 text-sky-700 border-sky-200"
+                    }`}
+                  >
+                    {user.role}
+                  </span>
+                </div>
+
+                <div className="mt-5 space-y-3 text-sm">
+                  <div className="rounded-xl bg-muted/50 px-3 py-2">
+                    <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+                      Phone
+                    </div>
+                    <div className="mt-1 font-medium">{user.phone || "Not provided"}</div>
+                  </div>
+                  <div className="rounded-xl bg-muted/50 px-3 py-2">
+                    <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+                      User ID
+                    </div>
+                    <div className="mt-1 break-all font-mono text-xs">{user.user_id}</div>
+                  </div>
+                  <div className="rounded-xl bg-muted/50 px-3 py-2">
+                    <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+                      Joined
+                    </div>
+                    <div className="mt-1 font-medium">{new Date(user.created_at).toLocaleString()}</div>
+                  </div>
+                </div>
+
+                <div className="mt-5 flex items-center justify-between gap-3">
+                  <div className="text-xs text-muted-foreground">
+                    Login password cannot be shown from the database.
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => makeAdmin(user.user_id)}
+                    disabled={user.role === "admin"}
+                  >
+                    {user.role === "admin" ? "Already admin" : "Make admin"}
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function AdminBookingStatusBadge({ status }: { status: BookingStatus }) {
   const meta =
     status === "confirmed"
       ? "bg-success/15 text-success border-success/30"
-      : status === "pending"
-        ? "bg-warning/15 text-warning-foreground border-warning/40"
-        : status === "cancellation_requested"
+      : status === "pending" || status === "cancellation_requested"
           ? "bg-amber-500/15 text-amber-700 border-amber-500/30"
-          : "bg-destructive/15 text-destructive border-destructive/30";
+        : "bg-destructive/15 text-destructive border-destructive/30";
 
-  const label = status === "cancellation_requested" ? "Cancellation requested" : status;
+  const label =
+    status === "cancellation_requested" || status === "pending"
+      ? "Cancellation requested"
+      : status;
 
   return (
     <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium capitalize ${meta}`}>

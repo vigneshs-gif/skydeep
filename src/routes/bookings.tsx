@@ -37,7 +37,7 @@ type Booking = Database["public"]["Tables"]["bookings"]["Row"] & {
 export const Route = createFileRoute("/bookings")({
   head: () => ({
     meta: [
-      { title: "My bookings — SkyDeep Airlines" },
+      { title: "My bookings — skydeep" },
       { name: "description", content: "View your flight bookings and live flight status." },
     ],
   }),
@@ -155,20 +155,15 @@ function BookingCard({
   const [requestingCancellation, setRequestingCancellation] = useState(false);
   const flight = booking.flights;
   if (!flight) return null;
-
   const canRequestCancellation = booking.status === "pending" || booking.status === "confirmed";
+  const showsCancellationRequestedState = booking.status === "cancellation_requested";
 
   const requestCancellation = async () => {
     setRequestingCancellation(true);
-    const { error, needsSchemaUpdate } = await requestBookingCancellation({
+    const { error } = await requestBookingCancellation({
       bookingId: booking.id,
     });
     setRequestingCancellation(false);
-
-    if (needsSchemaUpdate) {
-      toast.warning("Cancellation approval will appear after the database update is completed.");
-      return;
-    }
 
     if (error) {
       toast.error(error.message);
@@ -245,7 +240,7 @@ function BookingCard({
           <Detail icon={Ticket} label="Total" value={formatCurrencyInr(Number(booking.total_price))} />
         </div>
 
-        {canRequestCancellation && (
+        {canRequestCancellation && !showsCancellationRequestedState && (
           <div className="mt-5 flex justify-end">
             <Button
               type="button"
@@ -263,6 +258,12 @@ function BookingCard({
             </Button>
           </div>
         )}
+
+        {showsCancellationRequestedState && (
+          <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            Cancellation requested. We&apos;ll review it shortly.
+          </div>
+        )}
       </div>
     </motion.div>
   );
@@ -276,10 +277,8 @@ async function requestBookingCancellation({
   const result = await updateBookingStatus(bookingId, "cancellation_requested");
   return {
     error: result.ok ? null : new Error(result.message ?? "Unable to request cancellation."),
-    needsSchemaUpdate: false,
   };
 }
-
 function BookingStatusBadge({ status }: { status: Booking["status"] }) {
   const meta =
     status === "confirmed"
